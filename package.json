@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "npx -y node@24 ./node_modules/@angular/cli/bin/ng.js serve",
-    "build": "npx -y node@24 ./node_modules/@angular/cli/bin/ng.js build",
-    "test": "npx -y node@24 ./node_modules/@angular/cli/bin/ng.js test"
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test"
   },
   "dependencies": {
     "@angular/common": "^22.0.0",
