@@ -1,0 +1,549 @@
+<section class="login-page" *ngIf="showLogin">
+  <div class="login-brand"><span class="brand-mark"><i></i><i></i></span><strong>Super<span>Offer</span></strong></div>
+  <div class="login-story">
+    <span class="login-kicker">INSTITUTION ADMISSIONS WORKSPACE</span>
+    <h1>Find students who are ready for what you offer.</h1>
+    <p>Search verified student profiles, understand every match, build shortlists, and send personalized admission offers from one secure workspace.</p>
+    <div class="login-proof"><span><b>248</b> strong matches</span><span><b>81%</b> offer view rate</span><span><b>26%</b> acceptance rate</span></div>
+    <div class="login-trust"><span>✓ Verified profiles</span><span>✓ Protected student contacts</span><span>✓ Human-led admissions</span></div>
+  </div>
+  <article class="login-card">
+    <div class="login-role-tabs"><button [class.active]="loginRole==='university'" (click)="selectLoginRole('university')">University staff</button><button [class.active]="loginRole==='student'" (click)="selectLoginRole('student')">Student</button></div>
+    <div class="login-card-title"><small>{{ loginRole==='university' ? 'NORTHBRIDGE UNIVERSITY' : 'STUDENT ACCOUNT' }}</small><h2>{{ loginRole==='university' ? 'Welcome back, Maya' : 'Welcome back, Aarav' }}</h2><p>{{ loginRole==='university' ? 'Sign in to manage your admissions pipeline.' : 'Sign in to view your offers and profile.' }}</p></div>
+    <form (ngSubmit)="signIn()">
+      <label>Email address<input name="loginEmail" [(ngModel)]="loginEmail" type="email" required></label>
+      <label>Password<span><button type="button" (click)="notify('Password reset link sent')">Forgot password?</button></span><input name="loginPassword" [(ngModel)]="loginPassword" type="password" required></label>
+      <label class="remember-login"><input type="checkbox" checked> Keep me signed in on this device</label>
+      <button class="login-submit" type="submit">Sign in to {{ loginRole==='university' ? 'university portal' : 'SuperOffer' }} →</button>
+    </form>
+    <div class="login-security"><span>⌾</span><p><strong>Secure institution access</strong>Your organization must be verified before student search and invitations are enabled.</p></div>
+    <p class="login-help">{{ loginRole==='university' ? 'Joining your university team?' : 'New to SuperOffer?' }} <button (click)="notify(loginRole==='university' ? 'Organization invitation flow opened' : 'Student registration opened')">{{ loginRole==='university' ? 'Accept an officer invitation' : 'Create an account' }}</button></p>
+  </article>
+</section>
+
+<div class="app-shell" *ngIf="!showLogin" [class.sidebar-collapsed]="!sidebarOpen" [class.student-offers-shell]="role === 'student'">
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-brand-row">
+    <button class="brand" (click)="navigate('Dashboard')" aria-label="SuperOffer home">
+      <span class="brand-mark"><i></i><i></i></span>
+      <span class="brand-name">Super<span>Offer</span></span>
+    </button>
+    <button class="hamburger" (click)="sidebarOpen=!sidebarOpen" aria-label="Toggle navigation"><i></i><i></i><i></i></button>
+    </div>
+    <div class="role-pill">{{ cfg.label }}</div>
+    <nav>
+      <button *ngFor="let item of cfg.nav" [class.active]="active === item.label" (click)="navigate(item.label)">
+        <span class="nav-icon">{{ item.icon }}</span><span class="nav-label">{{ item.label }}</span>
+        <em *ngIf="item.label === 'Offer Inbox'">3</em>
+        <em *ngIf="item.label === 'Invitations' && isInstitution">8</em>
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="help-card">
+        <span>?</span>
+        <strong>Need a hand?</strong>
+        <small>Explore the help centre</small>
+        <button (click)="notify('Help centre is ready for backend integration')">Get help</button>
+      </div>
+      <div class="student-sidebar-profile user-switcher">
+        <button class="user-button" (click)="role === 'student' ? navigate('Profile') : showRoleMenu = !showRoleMenu">
+          <span class="avatar" [class.has-photo]="role === 'student' && profilePhoto"><img *ngIf="role === 'student' && profilePhoto" [src]="profilePhoto" alt=""><ng-container *ngIf="role !== 'student' || !profilePhoto">{{ cfg.user.split(' ')[0][0] }}{{ cfg.user.split(' ')[1][0] }}</ng-container></span>
+          <span><strong>{{ cfg.user }}</strong><small>{{ role === 'student' ? (profileSubmitted ? 'View or update profile' : 'Complete your profile') : cfg.org }}</small></span><b>{{ role === 'student' ? '→' : '⌃' }}</b>
+        </button>
+        <button class="profile-role-toggle" *ngIf="role === 'student'" (click)="showRoleMenu = !showRoleMenu" aria-label="Preview another role">•••</button>
+        <div class="role-menu sidebar-role-menu" *ngIf="showRoleMenu">
+          <small>Preview role</small>
+          <button *ngFor="let r of roleOptions" (click)="selectRole(r)" [class.selected]="role === r">{{ configs[r].label }} <span *ngIf="role === r">✓</span></button>
+        </div>
+      </div>
+      <small>© 2026 SuperOffer</small>
+    </div>
+  </aside>
+
+  <main>
+    <header class="student-page-header" *ngIf="role === 'student'">
+      <button class="student-screen-brand" (click)="navigate('Offers')" aria-label="Back to offers"><span class="brand-mark"><i></i><i></i></span><strong>Super<span>Offer</span></strong></button>
+      <button class="student-top-profile" (click)="showStudentMenu=!showStudentMenu" aria-label="Open student menu" [attr.aria-expanded]="showStudentMenu">
+        <span class="avatar" [class.has-photo]="profilePhoto"><img *ngIf="profilePhoto" [src]="profilePhoto" alt=""><ng-container *ngIf="!profilePhoto">AM</ng-container></span>
+      </button>
+      <div class="student-account-menu" *ngIf="showStudentMenu">
+        <div class="student-menu-identity"><span class="avatar" [class.has-photo]="profilePhoto"><img *ngIf="profilePhoto" [src]="profilePhoto" alt=""><ng-container *ngIf="!profilePhoto">AM</ng-container></span><div><strong>Aarav Mehta</strong><small>{{ profileSubmitted ? 'Profile is live' : 'Profile in progress' }}</small></div></div>
+        <button (click)="navigate('Profile')"><span>◎</span><div><strong>{{ profileSubmitted ? 'View or update profile' : 'Complete your profile' }}</strong><small>Personal details and documents</small></div><b>→</b></button>
+        <button (click)="showStudentMenu=false; notify('Notification preferences opened')"><span>◉</span><div><strong>Notification preferences</strong><small>Offers, messages and deadlines</small></div><b>→</b></button>
+        <button (click)="showStudentMenu=false; notify('Security settings opened')"><span>⌾</span><div><strong>Password & security</strong><small>Password and active sessions</small></div><b>→</b></button>
+        <div class="student-menu-danger">
+            <button (click)="logout()">↪ Log out</button>
+          <button (click)="showStudentMenu=false; notify('Delete account requires identity confirmation')">Delete account</button>
+        </div>
+      </div>
+    </header>
+    <button class="floating-mobile-menu" *ngIf="role !== 'student'" (click)="sidebarOpen=!sidebarOpen" aria-label="Open navigation">☰</button>
+    <section class="content discovery-dashboard" *ngIf="active === 'Dashboard' && role === 'student' && !profileSubmitted">
+      <div class="discovery-hero">
+        <div class="discovery-copy"><span class="discovery-badge">YOUR GLOBAL STUDY JOURNEY STARTS HERE</span><h1>One profile. Your best offers.<br><em>No endless applications.</em></h1><p>Build one trusted student profile and let verified universities, education lenders and study-abroad experts come to you with personalized opportunities.</p><div class="hero-actions"><button class="primary-btn large" (click)="navigate('Profile')">{{ educationLevel ? 'Continue your profile' : 'Create your free profile' }} →</button><button class="hero-link" (click)="notify('SuperOffer connects your profile with verified partners through secure matching')">How SuperOffer works <span>▶</span></button></div><div class="trust-row"><span>✓ Free for students</span><span>✓ Verified institutions only</span><span>✓ Your contact details stay private</span></div></div>
+        <div class="journey-preview">
+          <div class="preview-head"><span>AM</span><div><strong>Your opportunity hub</strong><small>Unlocks after profile submission</small></div><b>{{ profileProgress }}%</b></div>
+          <div class="preview-flow"><div><span class="flow-icon university">▥</span><p><strong>University offers</strong><small>Admissions & scholarships</small></p><i>Matched to your goals</i></div><div><span class="flow-icon funding">₹</span><p><strong>Education funding</strong><small>Indicative offers from verified lenders</small></p><i>Compare clear terms</i></div></div>
+          <div class="preview-lock">⌾ Complete your profile to become discoverable</div>
+        </div>
+      </div>
+
+      <div class="getting-started">
+        <div class="section-title"><div><h2>How SuperOffer works for you</h2><p>You stay in control at every step.</p></div></div>
+        <div class="how-grid"><article><span>01</span><i>◎</i><h3>Tell your complete story</h3><p>Add academics, study goals, achievements, finances and required documents once.</p></article><article><span>02</span><i>✦</i><h3>Get matched securely</h3><p>Verified universities and education lenders find eligible profiles through their own secure portals.</p></article><article><span>03</span><i>✉</i><h3>Receive real offers</h3><p>Review university admission, scholarship and education funding offers in one place.</p></article><article><span>04</span><i>⇄</i><h3>Compare and decide</h3><p>Compare benefits and terms, negotiate once, then accept the option that works for you.</p></article></div>
+      </div>
+
+      <article class="profile-callout">
+        <div class="callout-progress"><strong>{{ profileProgress }}%</strong><span><i [style.width.%]="profileProgress"></i></span></div>
+        <div><small>NEXT STEP</small><h3>{{ educationLevel ? 'Your profile is waiting for you' : 'Start with your education level' }}</h3><p>{{ educationLevel ? 'Continue where you left off. Your progress is saved.' : 'Choose School Student (UG) or College Student (PG), then we’ll tailor every section.' }}</p></div>
+        <button class="primary-btn" (click)="navigate('Profile')">{{ educationLevel ? 'Continue profile' : 'Get started' }} →</button>
+      </article>
+    </section>
+
+    <section class="content" *ngIf="active === 'Dashboard' && role === 'student' && profileSubmitted">
+      <div class="welcome">
+        <div><p class="eyebrow">SATURDAY, 25 JULY</p><h1>Good morning, Aarav <span>👋</span></h1><p>Your profile is getting noticed. You have <strong>3 offers</strong> waiting for you.</p></div>
+        <button class="secondary-btn" (click)="navigate('Inbox')">View all offers <span>→</span></button>
+      </div>
+
+      <div class="portfolio-layout">
+        <article class="student-portfolio">
+          <div class="portfolio-cover"><span>OPEN TO FALL 2027 OPPORTUNITIES</span><button (click)="navigate('Profile')">Edit profile</button></div>
+          <div class="portfolio-body">
+            <div class="portfolio-photo"><img *ngIf="profilePhoto" [src]="profilePhoto" alt="Aarav Mehta"><span *ngIf="!profilePhoto">AM</span><i title="Verified profile">✓</i></div>
+            <div class="portfolio-identity"><div><h2>Aarav Mehta</h2><span class="public-badge">● Discoverable</span></div><p>{{ educationLevel==='school' ? 'Aspiring undergraduate student' : 'Aspiring postgraduate student' }} · India</p><div class="portfolio-tags"><span *ngFor="let interest of selectedInterests">{{ interest }}</span></div></div>
+            <div class="portfolio-score"><small>PROFILE SCORE</small><strong>94</strong><span>Excellent</span></div>
+          </div>
+          <div class="portfolio-details"><div><small>ACADEMIC</small><strong>{{ educationLevel==='school' ? 'Class 12 · CBSE' : 'BTech · Computer Science' }}</strong><span>{{ educationLevel==='school' ? '92% predicted' : '8.8 / 10 CGPA' }}</span></div><div><small>TEST SCORES</small><strong>IELTS 8.0</strong><span>{{ educationLevel==='school' ? 'SAT 1420' : 'GRE 324' }}</span></div><div><small>STUDY GOAL</small><strong>{{ educationLevel==='school' ? 'Bachelor’s' : 'Master’s' }} in Data Science</strong><span>Canada · Fall 2027</span></div><div><small>ACHIEVEMENTS</small><strong>5 highlights</strong><span>National finalist · 2 projects</span></div></div>
+          <div class="portfolio-foot"><span>✦ Profile optimized for <strong>{{ selectedInterests.length }} study interests</strong></span><button (click)="navigate('Profile')">View full profile →</button></div>
+        </article>
+
+        <article class="leaderboard-card card">
+          <div class="leaderboard-head"><div><span>♛</span><div><small>SUPERSTUDENT</small><h2>Leaderboard</h2></div></div><button (click)="notify('Leaderboard scores are based on profile quality, not personal background')">How it works</button></div>
+          <p class="leaderboard-intro">Top profiles in your study-interest group this month.</p>
+          <div class="leaderboard-list"><div *ngFor="let person of leaderboard" [class.you]="person.me"><b>{{ person.rank }}</b><span class="leader-avatar">{{ person.initials }}</span><p><strong>{{ person.name }} <em *ngIf="person.me">YOU</em></strong><small>{{ person.detail }}</small></p><div><strong>{{ person.score }}</strong><small>score</small></div></div></div>
+          <div class="leaderboard-note">✦ Improve your rank by keeping achievements, scores and documents complete.</div>
+        </article>
+      </div>
+
+      <div class="section-title"><div><h2>University offers picked for you</h2><p>Personalized admission and scholarship invitations from verified universities.</p></div><button (click)="navigate('Offers')">View all offers <span>→</span></button></div>
+      <div class="offer-grid">
+        <article class="offer-card" *ngFor="let offer of universityOffers" (click)="showOffer=true">
+          <div class="offer-top"><span class="logo institution-logo"><img [src]="offer.logo" [alt]="offer.institution + ' logo'"></span><div><small>{{ offer.type }}</small><strong>{{ offer.institution }}</strong></div><button aria-label="Save offer" (click)="$event.stopPropagation(); notify('Offer saved')">♡</button></div>
+          <div class="match-chip">✦ {{ offer.score }}% match</div>
+          <h3>{{ offer.title }}</h3><strong class="offer-highlight">{{ offer.highlight }}</strong><p>{{ offer.detail }}</p>
+          <div class="offer-bottom"><span [class.negotiating]="offer.status==='Negotiating'"><i></i>{{ offer.status }}</span><small>Expires in {{ offer.days }} days</small><b>→</b></div>
+        </article>
+      </div>
+
+      <article class="tip-banner"><span>✦</span><div><strong>Make your profile work harder</strong><p>Adding your IELTS score could increase your university matches by up to 22%.</p></div><button (click)="navigate('Profile')">Add test score →</button><button class="close" (click)="notify('Tip dismissed')">×</button></article>
+    </section>
+
+    <section class="content" *ngIf="active === 'Dashboard' && isInstitution">
+      <div class="welcome institution-welcome">
+        <div><p class="eyebrow">YOUR TALENT PIPELINE</p><h1>Good morning, {{ cfg.user.split(' ')[0] }}</h1><p>Here’s how <strong>{{ cfg.org }}</strong> is performing this cycle.</p></div>
+        <button class="primary-btn" (click)="navigate('Search Students')">⌕ Find students</button>
+      </div>
+      <div class="kpi-grid">
+        <article><span class="kpi-icon purple-bg">✦</span><div><small>Strong matches</small><strong>248</strong><em>↗ 12% this month</em></div></article>
+        <article><span class="kpi-icon orange-bg">✉</span><div><small>Invitations sent</small><strong>42</strong><em>18 remaining</em></div></article>
+        <article><span class="kpi-icon green-bg">✓</span><div><small>Accepted offers</small><strong>11</strong><em>26.2% conversion</em></div></article>
+        <article><span class="kpi-icon blue-bg">◇</span><div><small>Avg. match score</small><strong>87%</strong><em>Top 15% of institutions</em></div></article>
+      </div>
+      <div class="dashboard-columns">
+        <article class="card candidates">
+          <div class="card-head"><div><span class="section-icon">✦</span><strong>Recommended students</strong></div><button (click)="navigate('Search Students')">View all →</button></div>
+          <div class="candidate-row" *ngFor="let person of students">
+            <span class="candidate-avatar" [style.background]="person.accent">{{ person.initials }}</span>
+            <div class="candidate-main"><strong>{{ person.name }}</strong><small>{{ person.course }} · {{ person.country }}</small><span>{{ person.detail }}</span></div>
+            <div class="match-score"><strong>{{ person.score }}%</strong><small>match</small></div>
+            <button (click)="notify(person.name + ' added to shortlist')">＋ Shortlist</button>
+          </div>
+        </article>
+        <article class="card quota-card">
+          <div class="card-head"><div><span class="section-icon orange-bg">◇</span><strong>Growth plan</strong></div><span class="verified">✓ Active</span></div>
+          <div class="quota"><div><span>Profile views</span><strong>152 / 200</strong></div><div class="bar"><i style="width:76%"></i></div><small>48 views remaining</small></div>
+          <div class="quota"><div><span>Invitations</span><strong>42 / 60</strong></div><div class="bar orange-bar"><i style="width:70%"></i></div><small>18 invitations remaining</small></div>
+          <button class="secondary-btn full" (click)="navigate('Org Settings')">Manage subscription</button>
+        </article>
+      </div>
+      <article class="card invitation-table">
+        <div class="card-head"><div><span class="section-icon green-bg">↗</span><strong>Recent invitations</strong></div><button (click)="navigate('Invitations')">View all →</button></div>
+        <div class="table-head"><span>STUDENT</span><span>OFFER</span><span>MATCH</span><span>STATUS</span><span>SENT</span></div>
+        <div class="table-row" *ngFor="let person of students; let i=index"><span><b>{{ person.name }}</b><small>{{ person.intake }}</small></span><span>{{ role==='loan' ? 'Global education loan' : role==='consultant' ? 'Premium guidance' : person.course }}</span><span><b class="score-pill">{{ person.score }}%</b></span><span><b class="status-pill" [class.negotiating]="i===1">{{ i===0?'Viewed':i===1?'Negotiating':'Accepted' }}</b></span><span>{{ i+2 }} days ago</span></div>
+      </article>
+    </section>
+
+    <section class="content university-page" *ngIf="role==='university' && active==='Programs & Offers'">
+      <header class="university-page-head"><div><p class="eyebrow">ACADEMIC CATALOGUE</p><h1>Programs & offer strategy</h1><p>Maintain the programme information and criteria used to find suitable students.</p></div><button class="primary-btn" (click)="notify('New programme form opened')">＋ Add programme</button></header>
+      <nav class="university-tabs"><button [class.active]="programView==='catalog'" (click)="programView='catalog'">Program catalogue</button><button [class.active]="programView==='criteria'" (click)="programView='criteria'">Admission criteria</button><button [class.active]="programView==='templates'" (click)="programView='templates'">Offer templates</button></nav>
+      <div *ngIf="programView==='catalog'" class="program-catalog">
+        <div class="catalog-note"><span>✓</span><p><strong>Catalogue is active</strong>Program data supports matching; final seat availability and admission decisions remain with Northbridge University.</p></div>
+        <article *ngFor="let program of universityPrograms"><div class="program-mark">NB</div><div class="program-name"><small>{{ program.level }}</small><h2>{{ program.name }}</h2><p>{{ program.campus }} campus · {{ program.intake }}</p></div><div><small>SEATS</small><strong>{{ program.seats }}</strong></div><div><small>MATCHED STUDENTS</small><strong>{{ program.applicants }}</strong></div><span>{{ program.status }}</span><button (click)="notify(program.name+' editor opened')">Edit →</button></article>
+      </div>
+      <div *ngIf="programView==='criteria'" class="criteria-workspace">
+        <aside><small>APPLIES TO</small><h2>MSc Data Science</h2><p>Fall 2027 · Toronto</p><button *ngFor="let program of universityPrograms" (click)="notify('Criteria switched to '+program.name)">{{ program.name }}</button></aside>
+        <article>
+          <div><h2>Matching criteria</h2><p>These signals guide ranking only. Officers always make the final invitation and admission decision.</p><button class="primary-btn" (click)="notify('Admission criteria saved')">Save criteria</button></div>
+          <div class="criteria-grid"><label>Minimum academic score<input value="75% or 3.0 GPA"></label><label>Accepted curricula<input value="Any recognized bachelor’s degree"></label><label>Minimum IELTS<input value="6.5"></label><label>Preferred background<input value="CS, Mathematics, Engineering"></label><label>Target countries<input value="India, UAE, Singapore"></label><label>Scholarship budget band<input value="Up to 40% tuition"></label></div>
+          <div class="criteria-weights"><span><b style="width:35%"></b>Academic fit <strong>35%</strong></span><span><b style="width:20%"></b>Test score fit <strong>20%</strong></span><span><b style="width:20%"></b>Course alignment <strong>20%</strong></span><span><b style="width:15%"></b>Country & intake <strong>15%</strong></span><span><b style="width:10%"></b>Budget fit <strong>10%</strong></span></div>
+        </article>
+      </div>
+      <div *ngIf="programView==='templates'" class="template-grid">
+        <article><span>POPULAR</span><h2>Merit scholarship</h2><p>Up to 40% tuition scholarship · final transcript required · 14-day validity.</p><small>Used 28 times · 36% acceptance</small><button (click)="notify('Merit scholarship template opened')">Edit template →</button></article>
+        <article><span>FAST TRACK</span><h2>Priority admission</h2><p>Application fee waived · expedited faculty review · conditional admission.</p><small>Used 17 times · 41% acceptance</small><button (click)="notify('Priority admission template opened')">Edit template →</button></article>
+        <button class="new-template" (click)="notify('Blank offer template opened')"><b>＋</b><strong>Create offer template</strong><span>Start with consistent, reusable terms</span></button>
+      </div>
+    </section>
+
+    <section class="content university-page" *ngIf="role==='university' && active==='Shortlists'">
+      <header class="university-page-head"><div><p class="eyebrow">SHARED CANDIDATE LISTS</p><h1>Shortlists</h1><p>Organize promising students before sending a personalized offer.</p></div><button class="primary-btn" (click)="notify('New shortlist created')">＋ New shortlist</button></header>
+      <div class="shortlist-summary"><button class="active"><span>DS</span><div><strong>Data Science · Fall 2027</strong><small>12 students · updated today</small></div><b>→</b></button><button><span>AI</span><div><strong>AI scholarship candidates</strong><small>8 students · updated yesterday</small></div><b>→</b></button><button><span>UG</span><div><strong>Undergraduate priority</strong><small>21 students · updated 3 days ago</small></div><b>→</b></button></div>
+      <div class="shortlist-table">
+        <div class="shortlist-table-head"><span>STUDENT</span><span>FIT</span><span>ACADEMICS</span><span>ADDED BY</span><span>ACTION</span></div>
+        <article *ngFor="let person of students; let i=index"><div><span class="candidate-avatar" [style.background]="person.accent">{{ person.initials }}</span><p><strong>{{ person.name }}</strong><small>{{ person.course }} · {{ person.intake }}</small></p></div><b>{{ person.score }}%</b><span>{{ person.detail }}</span><span>{{ i===1 ? 'Oliver Grant' : 'Maya Chen' }}</span><div><button (click)="openCandidate(i)">Review</button><button class="primary-btn" (click)="composeUniversityOffer(i)">Send offer</button></div></article>
+      </div>
+    </section>
+
+    <section class="content university-page" *ngIf="role==='university' && active==='Invitations'">
+      <header class="university-page-head"><div><p class="eyebrow">ADMISSIONS PIPELINE</p><h1>Invitations</h1><p>Track every offer from first view through negotiation and acceptance.</p></div><button class="primary-btn" (click)="showUniversityOfferComposer=true">＋ Create invitation</button></header>
+      <div class="invitation-metrics"><div><small>SENT THIS CYCLE</small><strong>42</strong><span>18 remaining</span></div><div><small>VIEW RATE</small><strong>81%</strong><span>34 students viewed</span></div><div><small>ACCEPTANCE</small><strong>26.2%</strong><span>11 accepted</span></div><div><small>AVG. RESPONSE</small><strong>3.4d</strong><span>↓ 0.8 days</span></div></div>
+      <nav class="invitation-filters"><button *ngFor="let status of ['All','Sent','Viewed','Negotiating','Accepted','Rejected','Expired']" [class.active]="universityInvitationFilter===status" (click)="universityInvitationFilter=status">{{ status }}</button></nav>
+      <div class="university-invitations">
+        <article *ngFor="let item of filteredUniversityInvitations"><div><span>{{ item.student.split(' ')[0][0] }}{{ item.student.split(' ')[1][0] }}</span><p><strong>{{ item.student }}</strong><small>{{ item.program }}</small></p></div><p><small>OFFER</small><strong>{{ item.value }}</strong></p><p><small>MATCH</small><strong>{{ item.score }}%</strong></p><b [class.negotiating]="item.status==='Negotiating'" [class.accepted]="item.status==='Accepted'">{{ item.status }}</b><p><small>EXPIRES</small><strong>{{ item.expires }}</strong></p><button (click)="notify(item.status==='Negotiating' ? 'Negotiation thread opened' : 'Invitation details opened')">{{ item.status==='Negotiating' ? 'Respond' : 'View' }} →</button></article>
+      </div>
+      <div class="negotiation-alert"><span>!</span><div><strong>1 negotiation needs a response</strong><p>Sara Khan requested a scholarship review. The invitation still expires in 10 days.</p></div><button (click)="notify('Negotiation response workspace opened')">Review request →</button></div>
+    </section>
+
+    <section class="content university-page" *ngIf="role==='university' && active==='Reports'">
+      <header class="university-page-head"><div><p class="eyebrow">RECRUITMENT INTELLIGENCE</p><h1>Reports</h1><p>Understand which programmes, matches, and offers convert best.</p></div><div><button class="secondary-btn" (click)="notify('Weekly report scheduled')">Schedule email</button><button class="primary-btn" (click)="notify('CSV report exported')">Export CSV ↗</button></div></header>
+      <div class="report-toolbar"><button>Last 30 days⌄</button><button>All programmes⌄</button><span>Updated hourly · Last updated 10:00 PM</span></div>
+      <div class="funnel-report"><div><small>INVITATIONS SENT</small><strong>142</strong><i style="width:100%"></i></div><div><small>VIEWED</small><strong>115 <em>81%</em></strong><i style="width:81%"></i></div><div><small>NEGOTIATED</small><strong>29 <em>20%</em></strong><i style="width:44%"></i></div><div><small>ACCEPTED</small><strong>37 <em>26%</em></strong><i style="width:26%"></i></div></div>
+      <div class="report-grid"><article><div><h2>Conversion by match score</h2><span>Acceptance rate</span></div><div class="bar-chart"><span><i style="height:24%"></i><b>40–59</b><small>8%</small></span><span><i style="height:48%"></i><b>60–74</b><small>17%</small></span><span><i style="height:73%"></i><b>75–89</b><small>29%</small></span><span><i style="height:100%"></i><b>90–100</b><small>44%</small></span></div></article><article><div><h2>Top programmes</h2><span>Accepted / sent</span></div><ol><li><b>1</b><p><strong>MSc Data Science</strong><small>18 accepted from 44</small></p><span>40.9%</span></li><li><b>2</b><p><strong>MSc Artificial Intelligence</strong><small>11 accepted from 32</small></p><span>34.4%</span></li><li><b>3</b><p><strong>BSc Computer Science</strong><small>8 accepted from 29</small></p><span>27.6%</span></li></ol></article></div>
+    </section>
+
+    <section class="content university-page" *ngIf="role==='university' && active==='Org Settings'">
+      <header class="university-page-head"><div><p class="eyebrow">NORTHBRIDGE UNIVERSITY</p><h1>Organization settings</h1><p>Manage your institution, team, subscription, notifications, and security.</p></div><span class="org-verified">✓ Verified organization</span></header>
+      <nav class="settings-rail"><button [class.active]="universitySettingsView==='organization'" (click)="universitySettingsView='organization'">Organization profile</button><button [class.active]="universitySettingsView==='team'" (click)="universitySettingsView='team'">Team & access</button><button [class.active]="universitySettingsView==='billing'" (click)="universitySettingsView='billing'">Subscription & billing</button><button [class.active]="universitySettingsView==='notifications'" (click)="universitySettingsView='notifications'">Notifications</button><button [class.active]="universitySettingsView==='security'" (click)="universitySettingsView='security'">Security & sessions</button></nav>
+      <div class="settings-panel" *ngIf="universitySettingsView==='organization'"><div><h2>University profile</h2><p>Official information shown to students and used for verification.</p></div><div class="settings-form"><label>University name<input value="Northbridge University"></label><label>Institution type<select><option>Private university</option></select></label><label>Official domain<input value="northbridge.edu"></label><label>Primary campus<input value="Toronto, Canada"></label><label class="wide">About the university<textarea>Northbridge University is a globally connected institution focused on applied learning, research and student outcomes.</textarea></label></div><div class="accreditation-row"><span>✓</span><div><strong>Accreditation verified</strong><p>Canadian Higher Education Council · valid until June 2028</p></div><button (click)="notify('Accreditation documents opened')">View documents</button></div><button class="primary-btn" (click)="notify('Organization profile saved')">Save changes</button></div>
+      <div class="settings-panel" *ngIf="universitySettingsView==='team'"><div><h2>Admissions team</h2><p>Growth plan · 4 of 10 officer seats used.</p><button class="primary-btn" (click)="notify('Officer invitation sent')">＋ Invite officer</button></div><div class="team-row" *ngFor="let member of ['Maya Chen|Primary officer|Active','Oliver Grant|Admissions manager|Active','Emma Wilson|Programme adviser|Active','Noah Patel|Admissions officer|Invited']"><span>{{ member.split('|')[0].split(' ')[0][0] }}{{ member.split('|')[0].split(' ')[1][0] }}</span><p><strong>{{ member.split('|')[0] }}</strong><small>{{ member.split('|')[1] }}</small></p><b>{{ member.split('|')[2] }}</b><button (click)="notify('Team member settings opened')">•••</button></div></div>
+      <div class="settings-panel billing-panel" *ngIf="universitySettingsView==='billing'"><div><h2>Growth plan</h2><p>Renews 25 August 2026 · Monthly billing</p><button class="primary-btn" (click)="notify('Plan comparison opened')">Upgrade plan</button></div><div class="billing-usage"><span><small>Profile views</small><strong>752 / 1,000</strong><i><b style="width:75.2%"></b></i></span><span><small>Invitations</small><strong>242 / 300</strong><i><b style="width:80.6%"></b></i></span><span><small>Officer seats</small><strong>4 / 10</strong><i><b style="width:40%"></b></i></span></div><button (click)="notify('Payment methods opened')">Payment method →</button><button (click)="notify('Invoice history opened')">Invoice history →</button><label><input type="checkbox" checked> Automatically renew subscription</label></div>
+      <div class="settings-panel" *ngIf="universitySettingsView==='notifications'"><div><h2>Notification preferences</h2><p>State-change alerts remain enabled; choose their delivery channel and digest frequency.</p></div><div class="notification-setting" *ngFor="let item of ['Student viewed an invitation','Negotiation requested','Offer accepted or rejected','Invitation expiring in 48 hours','New matches from saved searches','Weekly funnel report']"><p><strong>{{ item }}</strong><small>In-app notification</small></p><label class="setting-switch"><input type="checkbox" checked><span></span></label><select><option>{{ item.includes('matches') || item.includes('report') ? 'Daily digest' : 'Immediately' }}</option></select></div></div>
+      <div class="settings-panel" *ngIf="universitySettingsView==='security'"><div><h2>Security & sessions</h2><p>Protect university data and manage officer access.</p></div><div class="security-action"><span>⌾</span><p><strong>Multi-factor authentication</strong><small>Recommended for officers with billing access.</small></p><button (click)="notify('MFA setup opened')">Set up</button></div><div class="security-action"><span>◉</span><p><strong>Current session · Chrome on macOS</strong><small>Bengaluru, India · active now</small></p><button>Current</button></div><div class="security-action"><span>↪</span><p><strong>Other active sessions</strong><small>1 session on Safari · last active yesterday</small></p><button (click)="notify('Other sessions revoked')">Revoke</button></div></div>
+    </section>
+
+    <section class="content" *ngIf="active === 'Dashboard' && role === 'admin'">
+      <div class="welcome"><div><p class="eyebrow">PLATFORM CONTROL CENTRE</p><h1>Marketplace overview</h1><p>Trust, growth and system health across SuperOffer.</p></div><button class="secondary-btn" (click)="navigate('Reports')">Export report ↗</button></div>
+      <div class="kpi-grid admin-kpis">
+        <article><span class="kpi-icon purple-bg">♙</span><div><small>Active users</small><strong>12,840</strong><em>↗ 8.4% this month</em></div></article>
+        <article><span class="kpi-icon orange-bg">✉</span><div><small>Invitations</small><strong>3,291</strong><em>31.8% accepted</em></div></article>
+        <article><span class="kpi-icon green-bg">◇</span><div><small>Monthly revenue</small><strong>₹28.4L</strong><em>↗ 11.2% MoM</em></div></article>
+        <article><span class="kpi-icon blue-bg">✓</span><div><small>System health</small><strong>99.98%</strong><em>All services operational</em></div></article>
+      </div>
+      <div class="dashboard-columns admin-columns">
+        <article class="card verification">
+          <div class="card-head"><div><span class="section-icon orange-bg">!</span><strong>Verification queue</strong><b class="count">6</b></div><button (click)="navigate('Universities')">Review all →</button></div>
+          <div class="verify-row"><span class="logo violet">WU</span><div><strong>Westford University</strong><small>University · Submitted 3h ago</small></div><span class="pending">Pending review</span><button (click)="notify('Westford University opened for review')">Review</button></div>
+          <div class="verify-row"><span class="logo mint">LF</span><div><strong>LearnFund Finance</strong><small>Loan provider · Submitted 7h ago</small></div><span class="pending">Pending review</span><button (click)="notify('LearnFund Finance opened for review')">Review</button></div>
+          <div class="verify-row"><span class="logo orange">AP</span><div><strong>AbroadPath</strong><small>Consultancy · Submitted yesterday</small></div><span class="pending">Pending review</span><button (click)="notify('AbroadPath opened for review')">Review</button></div>
+        </article>
+        <article class="card health-card">
+          <div class="card-head"><div><span class="section-icon green-bg">✓</span><strong>Marketplace balance</strong></div></div>
+          <div class="balance"><div class="donut"></div><div><span><i class="dot purple-dot"></i>Students <b>9,480</b></span><span><i class="dot orange-dot"></i>Universities <b>214</b></span><span><i class="dot green-dot"></i>Lenders <b>86</b></span><span><i class="dot blue-dot"></i>Consultants <b>172</b></span></div></div>
+        </article>
+      </div>
+      <article class="audit-banner"><span>≡</span><div><strong>Audit trail is active</strong><p>Every administrative action is recorded with before/after state and timestamp.</p></div><button (click)="navigate('Audit Log')">Open audit log →</button></article>
+    </section>
+
+    <section class="content offer-workspace-page" *ngIf="role === 'student' && active === 'Offers'">
+      <div class="locked-opportunities card" *ngIf="!profileSubmitted"><span>✦</span><div><h2>Your offers will appear here</h2><p>Complete your profile to receive personalized university and education-loan offers.</p></div><button class="primary-btn" (click)="navigate('Profile')">Complete profile →</button></div>
+      <div class="offer-workspace" *ngIf="profileSubmitted">
+        <aside class="offer-mailbox">
+          <div class="mailbox-toolbar"><button class="all-offers-reset" (click)="setOfferFilter('all')"><strong>{{ offerFilter === 'all' ? 'All offers' : 'Show all offers' }}</strong><small>{{ offers.length }} opportunities</small></button><div class="compact-offer-filters"><button [class.active]="offerFilter === 'accepted'" (click)="setOfferFilter('accepted')">✓ Accepted <b>{{ acceptedOfferCount }}</b></button><button [class.active]="offerFilter === 'shortlisted'" (click)="setOfferFilter('shortlisted')">☆ Shortlisted <b>{{ shortlistedOfferCount }}</b></button><button [class.active]="offerFilter === 'rejected'" (click)="setOfferFilter('rejected')">× Rejected <b>{{ rejectedOfferCount }}</b></button></div></div>
+          <div class="empty-offer-filter" *ngIf="!filteredOffers.length"><span>⌕</span><strong>No {{ offerFilter }} offers yet</strong><p>Choose an offer from “All offers,” then use the decision buttons on the right.</p><button (click)="setOfferFilter('all')">Show all offers</button></div>
+          <button class="offer-mail-item" *ngFor="let offer of filteredOffers" [class.selected]="selectedOffer === offer" (click)="selectOffer(offer)">
+            <span class="logo institution-logo"><img [src]="offer.logo" [alt]="offer.institution + ' logo'"></span>
+            <div class="mail-offer-main"><div><small>{{ offer.type }}</small><time>{{ offer.days }}d left</time></div><strong>{{ offer.institution }}</strong><p>{{ offer.title }}</p><b>{{ offer.highlight }}</b></div>
+            <i *ngIf="offer.status === 'New'"></i>
+          </button>
+        </aside>
+
+        <article class="offer-reading-pane">
+          <div class="offer-details-column">
+            <header class="reading-pane-header">
+              <div class="reading-institution"><span class="logo institution-logo"><img [src]="selectedOffer.logo" [alt]="selectedOffer.institution + ' logo'"></span><div><small>{{ selectedOffer.type }} OFFER</small><h2>{{ selectedOffer.institution }}</h2><p class="reading-course">{{ selectedOffer.title }}</p><p class="reading-verification">Verified organization · {{ selectedOffer.score }}% profile match</p></div></div>
+              <span class="header-offer-status" [class.rejected-status]="selectedOffer.status === 'Rejected'" [class.shortlisted-status]="selectedOffer.status === 'Shortlisted'" [class.accepted-status]="selectedOffer.status === 'Accepted'">{{ selectedOffer.status }}</span>
+            </header>
+            <div class="reading-pane-scroll">
+              <section class="offer-detail-hero">
+                <small>{{ selectedOffer.type === 'University' ? 'ADMISSION & SCHOLARSHIP OFFER' : 'EDUCATION FUNDING OFFER' }}</small>
+                <h1>{{ selectedOffer.highlight }}</h1>
+                <div class="offer-key-terms">
+                  <div *ngFor="let fact of selectedOffer.facts"><small>{{ fact.label }}</small><strong>{{ fact.value }}</strong></div>
+                </div>
+              </section>
+              <section class="offer-conditions">
+                <div><h3>Offer details</h3><p *ngIf="selectedOffer.type === 'University'">You have been selected based on your academic profile, study goals and verified test scores. This offer includes admission to the stated programme and the scholarship shown above.</p><p *ngIf="selectedOffer.type !== 'University'">This indicative education-loan offer is based on your profile, proposed course and funding preferences. Final sanction is subject to document and co-applicant verification.</p></div>
+                <button (click)="notify('Complete offer document opened')">View complete terms ↗</button>
+              </section>
+              <section class="offer-next-steps"><div><small>NEXT STEPS</small><strong>{{ selectedOffer.days }} days to respond</strong></div><ul><li *ngFor="let requirement of selectedOffer.requirements">{{ requirement }}</li></ul></section>
+            </div>
+            <footer class="offer-decision-bar"><button class="secondary-btn shortlist-action" [class.chosen]="selectedOffer.status === 'Shortlisted'" (click)="shortlistSelectedOffer()">☆ {{ selectedOffer.status === 'Shortlisted' ? 'Shortlisted' : 'Shortlist' }}</button><button class="secondary-btn reject-action" [class.chosen]="selectedOffer.status === 'Rejected'" (click)="rejectSelectedOffer()">× {{ selectedOffer.status === 'Rejected' ? 'Rejected' : 'Reject' }}</button><button class="primary-btn" [disabled]="selectedOffer.status === 'Accepted'" (click)="acceptSelectedOffer()">{{ selectedOffer.status === 'Accepted' ? '✓ Accepted' : 'Accept offer' }}</button></footer>
+          </div>
+          <section class="offer-conversation">
+            <div class="conversation-head"><div class="chat-contact"><span class="institution-logo"><img [src]="selectedOffer.logo" alt=""></span><div><h3>{{ selectedOffer.repName }}</h3><p>{{ selectedOffer.repTitle }}</p><small><i></i> Online</small></div></div></div>
+            <div class="message-thread" #messageThread aria-live="polite">
+              <div *ngFor="let message of currentOfferMessages" [class.student-message]="message.from === 'student'"><span [class.message-logo]="message.from === 'institution'"><img *ngIf="message.from === 'institution'" [src]="selectedOffer.logo" alt=""><ng-container *ngIf="message.from === 'student'">AM</ng-container></span><div><strong>{{ message.from === 'student' ? 'You' : selectedOffer.repName }}</strong><p>{{ message.text }}</p><small>{{ message.time }}</small></div></div>
+              <div class="typing-message" *ngIf="institutionTyping"><span class="message-logo"><img [src]="selectedOffer.logo" alt=""></span><div><strong>{{ selectedOffer.repName }}</strong><p><i></i><i></i><i></i></p><small>typing…</small></div></div>
+            </div>
+            <form class="message-composer" (ngSubmit)="sendOfferMessage()"><button type="button" (click)="notify('Attachment picker opened')" aria-label="Attach document">＋</button><input name="chatMessage" [(ngModel)]="chatMessage" autocomplete="off" [placeholder]="'Message ' + selectedOffer.institution + '…'"><button type="submit" class="primary-btn" [disabled]="!chatMessage.trim()">Send →</button></form>
+          </section>
+        </article>
+      </div>
+    </section>
+
+    <section class="content" *ngIf="role !== 'student' && role !== 'university' && (active === 'Inbox' || active === 'University Offers' || active === 'My Offers' || active === 'Invitations')">
+      <div class="page-heading"><div><p class="eyebrow">OUTREACH</p><h1>Invitations</h1><p>Track every offer from sent to resolution.</p></div><button *ngIf="isInstitution" class="primary-btn" (click)="notify('New offer composer opened')">＋ Create invitation</button></div>
+      <div class="filter-tabs"><button *ngFor="let f of ['All','New','Negotiating','Accepted','Rejected','Expired']" [class.active]="inboxFilter===f" (click)="inboxFilter=f">{{ f }}<span *ngIf="f==='All'">3</span></button></div>
+      <div class="inbox-layout">
+        <article class="inbox-list card">
+          <button class="inbox-item" *ngFor="let offer of offers" (click)="showOffer=true">
+            <span class="logo" [class]="offer.color">{{ offer.brand }}</span>
+            <div><small>{{ offer.type }} · {{ offer.score }}% match</small><strong>{{ offer.institution }}</strong><span>{{ offer.title }}</span><em>{{ offer.highlight }}</em></div>
+            <aside><b [class.negotiating]="offer.status==='Negotiating'">{{ offer.status }}</b><small>{{ offer.days }} days left</small><span>›</span></aside>
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <section class="content partner-student-page" *ngIf="role==='student' && active==='Loans & Funding'">
+      <div class="page-heading"><div><p class="eyebrow">{{ active==='Loans & Funding' ? 'EDUCATION FUNDING' : 'STUDY ABROAD GUIDANCE' }}</p><h1>{{ active==='Loans & Funding' ? 'Your loan offers' : 'Your consultancy offers' }}</h1><p>{{ active==='Loans & Funding' ? 'Compare indicative funding invitations from verified banks and lenders.' : 'Choose verified experts for applications, SOP/LOR and visa support.' }}</p></div><span class="separate-portal-note">⌾ Partners use a separate verified portal</span></div>
+      <div class="partner-explainer card" *ngIf="!profileSubmitted"><span>₹</span><div><h2>Funding matched to your study plan</h2><p>Declare your budget and funding need in your profile. Verified lenders can then send indicative offers showing interest rate, fees, tenure and conditions. Final approval and disbursement happen directly with the lender.</p></div><button class="primary-btn" (click)="navigate('Profile')">Add preferences to profile →</button></div>
+      <div class="partner-offer card" *ngIf="profileSubmitted"><span class="logo" [class]="active==='Loans & Funding' ? 'mint' : 'orange'">{{ active==='Loans & Funding' ? 'EF' : 'GP' }}</span><div><small>{{ active==='Loans & Funding' ? 'VERIFIED EDUCATION LENDER' : 'VERIFIED CONSULTANCY' }}</small><h2>{{ active==='Loans & Funding' ? 'EduFund Capital' : 'GlobalPath Consulting' }}</h2><p>{{ active==='Loans & Funding' ? '₹32L · 9.2% indicative rate · 12-year tenure · conditional on verification' : 'Canada Complete · SOP/LOR, applications and visa support · ₹42,000' }}</p></div><button class="secondary-btn" (click)="showOffer=true">View offer details →</button></div>
+      <div class="student-safety-grid"><article><span>✓</span><h3>Verified organizations</h3><p>Only partners approved by SuperOffer can discover profiles or send invitations.</p></article><article><span>⌾</span><h3>You remain in control</h3><p>Your direct contact information stays private until you accept an offer.</p></article><article><span>⇄</span><h3>Clear terms first</h3><p>Review, compare, decline or request changes before making a commitment.</p></article></div>
+    </section>
+
+    <section class="content student-portfolio" *ngIf="false">
+      <header class="portfolio-cover">
+        <button class="portfolio-back" (click)="navigate('Offers')">← Offers</button>
+        <div class="cover-decoration one"></div><div class="cover-decoration two"></div>
+        <div class="portfolio-identity">
+          <div class="portfolio-avatar"><img *ngIf="profilePhoto" [src]="profilePhoto" alt="Aarav Mehta"><span *ngIf="!profilePhoto">AM</span></div>
+          <div><span class="live-badge">● Profile live</span><h1>Aarav Mehta</h1><p>{{ educationLevel==='school' ? 'Future undergraduate' : 'Future postgraduate' }} exploring Data Science · India</p><div class="portfolio-tags"><span *ngFor="let interest of selectedInterests">{{ interest }}</span></div></div>
+        </div>
+        <aside class="portfolio-progress">
+          <div class="progress-ring" [style.--progress]="profileCompletion"><strong>{{ profileCompletion }}%</strong></div>
+          <div><strong>Almost offer-ready</strong><span>Complete the highlighted items to improve your matches.</span><button (click)="setProfileView(4)">Finish profile →</button></div>
+        </aside>
+      </header>
+
+      <div class="profile-attention">
+        <div><span>✦</span><p><strong>Your next best steps</strong>2 personal details, {{ missingDocumentCount }} missing documents and {{ documentUpdateCount }} update are waiting.</p></div>
+        <button (click)="setProfileView(4)">Review what’s missing →</button>
+      </div>
+
+      <nav class="portfolio-tabs" aria-label="Student profile sections">
+        <button *ngFor="let view of profileViews; let i=index" [class.active]="profileViewSection===i" (click)="setProfileView(i)"><span>{{ view.icon }}</span>{{ view.label }}<b *ngIf="i===4 && (missingDocumentCount + documentUpdateCount)">{{ missingDocumentCount + documentUpdateCount }}</b></button>
+      </nav>
+
+      <main class="portfolio-stage">
+        <section class="portfolio-panel story-panel" *ngIf="profileViewSection===0">
+          <div class="panel-heading"><div><span>01 · MY STORY</span><h2>A curious student building toward a future in data.</h2><p>This is the short introduction verified universities see first.</p></div><button (click)="editProfileSection(1)">Edit story</button></div>
+          <blockquote>“I enjoy turning complex questions into useful ideas through technology. I’m looking for a practical, globally connected programme where I can grow in data science and AI.”</blockquote>
+          <div class="story-strip"><div><small>Based in</small><strong>New Delhi, India</strong></div><div><small>Looking for</small><strong>{{ educationLevel==='school' ? 'Bachelor’s' : 'Master’s' }} programmes</strong></div><div><small>Preferred intake</small><strong>Fall 2027</strong></div></div>
+          <div class="unfinished-details"><div><span>!</span><div><strong>2 details still need you</strong><p>A passport number and permanent address help institutions verify your identity.</p></div></div><button (click)="editProfileSection(1)">Complete details →</button></div>
+        </section>
+
+        <section class="portfolio-panel" *ngIf="profileViewSection===1">
+          <div class="panel-heading"><div><span>02 · ACADEMICS</span><h2>Your learning journey</h2><p>A simple view of the academic record used for matching.</p></div><button (click)="editProfileSection(2)">Edit academics</button></div>
+          <div class="academic-spotlight"><span>🎓</span><div><small>CURRENT EDUCATION</small><h3>{{ educationLevel==='school' ? 'Class 12 · CBSE' : 'BTech · Computer Science' }}</h3><p>{{ educationLevel==='school' ? 'Delhi Public School' : 'Delhi Technological University' }} · Completing in 2027</p></div><strong>{{ educationLevel==='school' ? '92%' : '8.8' }}<small>{{ educationLevel==='school' ? ' predicted' : ' / 10 CGPA' }}</small></strong></div>
+          <div class="score-showcase"><div><small>IELTS Academic</small><strong>8.0</strong><span>Verified score</span></div><div><small>{{ educationLevel==='school' ? 'SAT' : 'GRE' }}</small><strong>{{ educationLevel==='school' ? '1420' : '324' }}</strong><span>Verified score</span></div><div class="pending-score"><small>Test registration ID</small><strong>Not added</strong><button (click)="editProfileSection(4)">Add now →</button></div></div>
+        </section>
+
+        <section class="portfolio-panel" *ngIf="profileViewSection===2">
+          <div class="panel-heading"><div><span>03 · STUDY GOALS</span><h2>Where you want to go next</h2><p>Your goals guide admission, scholarship and funding matches.</p></div><button (click)="editProfileSection(3)">Edit goals</button></div>
+          <div class="goal-hero"><div><span>⌖</span><small>TARGET PROGRAMME</small><h3>{{ educationLevel==='school' ? 'Bachelor’s' : 'Master’s' }} in Data Science</h3><p>On-campus · Fall 2027</p></div><div class="country-route"><span>India</span><i>→</i><strong>Canada</strong><i>+</i><strong>United Kingdom</strong></div></div>
+          <div class="goal-notes"><div><small>What matters most</small><strong>Industry projects, placements and research access</strong></div><div><small>Funding plan</small><strong>Family savings + education loan</strong></div><div><small>Annual tuition range</small><strong>₹15–25 lakh</strong></div></div>
+        </section>
+
+        <section class="portfolio-panel" *ngIf="profileViewSection===3">
+          <div class="panel-heading"><div><span>04 · HIGHLIGHTS</span><h2>More than marks</h2><p>Projects, interests and achievements that make your profile memorable.</p></div><button (click)="editProfileSection(5)">Edit highlights</button></div>
+          <div class="highlight-feature"><span>✦</span><div><small>FEATURED PROJECT</small><h3>Student performance prediction using machine learning</h3><p>Built a small data model to explore the factors that influence academic outcomes and presented the findings at a college technology showcase.</p><div><b>Python</b><b>Machine learning</b><b>Data storytelling</b></div></div></div>
+          <div class="highlight-list"><div><span>🏆</span><p><strong>Academic distinction</strong>Department merit award · 2026</p></div><div><span>♙</span><p><strong>Student leadership</strong>Technology club coordinator</p></div><div><span>♡</span><p><strong>Beyond class</strong>Peer coding mentor and community volunteer</p></div></div>
+        </section>
+
+        <section class="portfolio-panel documents-portfolio" *ngIf="profileViewSection===4">
+          <div class="panel-heading"><div><span>05 · DOCUMENTS</span><h2>Your application wallet</h2><p>Only verified institutions can access documents you choose to share.</p></div><button (click)="editProfileSection(7)">Manage files</button></div>
+          <div class="document-summary"><div><strong>{{ uploadedDocumentCount }}</strong><span>ready to share</span></div><div><strong>{{ missingDocumentCount }}</strong><span>still missing</span></div><div><strong>{{ documentUpdateCount }}</strong><span>needs an update</span></div></div>
+          <div class="document-cards">
+            <article *ngFor="let doc of requiredDocuments" [class.missing]="!uploadedDocuments[doc]" [class.update]="doc==='Official academic transcripts'">
+              <span>{{ !uploadedDocuments[doc] ? '＋' : doc==='Official academic transcripts' ? '↻' : '✓' }}</span>
+              <div><strong>{{ doc }}</strong><small *ngIf="!uploadedDocuments[doc]">Missing · add when ready</small><small *ngIf="uploadedDocuments[doc] && doc!=='Official academic transcripts'">Uploaded · ready to share</small><small *ngIf="doc==='Official academic transcripts'">Update requested · add latest semester</small></div>
+              <button *ngIf="!uploadedDocuments[doc]" (click)="uploadDocument(doc)">Upload</button><button *ngIf="uploadedDocuments[doc]" (click)="editProfileSection(7)">{{ doc==='Official academic transcripts' ? 'Update' : 'View' }}</button>
+            </article>
+          </div>
+        </section>
+
+        <section class="portfolio-panel account-portfolio" *ngIf="profileViewSection===5">
+          <div class="panel-heading"><div><span>06 · ACCOUNT</span><h2>Your preferences</h2><p>Control notifications, security and your SuperOffer account.</p></div></div>
+          <div class="preference-list">
+            <div><span>✉</span><div><strong>Offer notifications</strong><p>Updates from universities and lenders.</p></div><label class="setting-switch"><input type="checkbox" [(ngModel)]="offerNotifications"><span></span></label></div>
+            <div><span>◎</span><div><strong>Email notifications</strong><p>Deadlines, messages and account updates.</p></div><label class="setting-switch"><input type="checkbox" [(ngModel)]="emailNotifications"><span></span></label></div>
+            <div><span>⌾</span><div><strong>Password & security</strong><p>Manage your password and active sessions.</p></div><button (click)="notify('Security settings opened')">Manage →</button></div>
+          </div>
+          <div class="account-footer"><button (click)="notify('You have been logged out of the demo')">↪ Log out</button><button class="danger" (click)="notify('Delete account requires identity confirmation')">Delete account</button></div>
+        </section>
+
+        <footer class="portfolio-pager">
+          <button [disabled]="profileViewSection===0" (click)="setProfileView(profileViewSection-1)">← Previous</button>
+          <span><b *ngFor="let view of profileViews; let i=index" [class.active]="profileViewSection===i"></b></span>
+          <button [disabled]="profileViewSection===profileViews.length-1" (click)="setProfileView(profileViewSection+1)">Next section →</button>
+        </footer>
+      </main>
+    </section>
+
+    <section class="content profile-centre" *ngIf="active === 'Profile' && profileSubmitted && !profileEditMode">
+      <div class="profile-centre-head">
+        <div><p class="eyebrow">PROFILE CENTRE</p><h1>Your student profile</h1><p>Review what institutions see, keep your details current, and finish any documents still needed.</p></div>
+        <div class="live-profile-status"><span>✓</span><div><strong>Profile is live</strong><small>Discoverable to verified institutions</small></div><button class="secondary-btn" (click)="navigate('Offers')">Back to offers →</button></div>
+      </div>
+      <div class="profile-health-grid">
+        <article class="profile-health-card"><span class="health-icon purple">◎</span><div><small>PROFILE STATUS</small><strong>Complete & published</strong><p>Last updated today</p></div><b>100%</b></article>
+        <article class="profile-health-card needs-attention"><span class="health-icon orange">▤</span><div><small>DOCUMENTS</small><strong>{{ uploadedDocumentCount }} of {{ requiredDocuments.length }} uploaded</strong><p>{{ missingDocumentCount }} document{{ missingDocumentCount === 1 ? '' : 's' }} still to add</p></div><button (click)="editProfileSection(7)">Manage →</button></article>
+        <article class="profile-health-card"><span class="health-icon green">⌾</span><div><small>VISIBILITY</small><strong>Discoverable</strong><p>Verified partners can match with you</p></div><button (click)="notify('Profile visibility settings opened')">Settings →</button></article>
+      </div>
+      <div class="profile-centre-layout">
+        <div class="saved-profile">
+          <div class="section-title compact"><div><h2>Your saved information</h2><p>Review each section and update only what has changed.</p></div><button (click)="editProfileSection(1)">Edit profile</button></div>
+          <article class="saved-profile-hero card">
+            <div class="saved-avatar"><img *ngIf="profilePhoto" [src]="profilePhoto" alt="Aarav Mehta"><span *ngIf="!profilePhoto">AM</span></div>
+            <div><div class="saved-name-row"><h2>Aarav Mehta</h2><span>● Live</span></div><p>{{ educationLevel==='school' ? 'Undergraduate applicant' : 'Postgraduate applicant' }} · India</p><div class="portfolio-tags"><span *ngFor="let interest of selectedInterests">{{ interest }}</span></div></div>
+            <button class="secondary-btn" (click)="editProfileSection(1)">Edit personal details</button>
+          </article>
+          <div class="saved-section-grid">
+            <article class="saved-section-card card"><div class="saved-section-title"><span>🎓</span><div><small>ACADEMIC INFORMATION</small><h3>{{ educationLevel==='school' ? 'Class 12 · CBSE' : 'BTech · Computer Science' }}</h3></div><button (click)="editProfileSection(2)">Edit</button></div><dl><div><dt>Institution</dt><dd>{{ educationLevel==='school' ? 'Delhi Public School' : 'Delhi Technological University' }}</dd></div><div><dt>Current score</dt><dd>{{ educationLevel==='school' ? '92% predicted' : '8.8 / 10 CGPA' }}</dd></div><div><dt>Completion</dt><dd>2027</dd></div></dl></article>
+            <article class="saved-section-card card"><div class="saved-section-title"><span>⌖</span><div><small>STUDY PREFERENCES</small><h3>{{ educationLevel==='school' ? 'Bachelor’s' : 'Master’s' }} in Data Science</h3></div><button (click)="editProfileSection(3)">Edit</button></div><dl><div><dt>Countries</dt><dd>Canada, United Kingdom</dd></div><div><dt>Intake</dt><dd>Fall 2027</dd></div><div><dt>Delivery</dt><dd>On campus</dd></div></dl></article>
+            <article class="saved-section-card card"><div class="saved-section-title"><span>✦</span><div><small>TEST SCORES</small><h3>IELTS 8.0 · {{ educationLevel==='school' ? 'SAT 1420' : 'GRE 324' }}</h3></div><button (click)="editProfileSection(4)">Edit</button></div><dl><div><dt>Language test</dt><dd>IELTS Academic</dd></div><div><dt>Entrance test</dt><dd>{{ educationLevel==='school' ? 'SAT' : 'GRE' }}</dd></div><div><dt>Status</dt><dd class="verified-value">✓ Verified</dd></div></dl></article>
+            <article class="saved-section-card card"><div class="saved-section-title"><span>₹</span><div><small>FINANCIAL PREFERENCES</small><h3>₹15–25 lakh annual budget</h3></div><button (click)="editProfileSection(6)">Edit</button></div><dl><div><dt>Funding plan</dt><dd>Family savings + loan</dd></div><div><dt>Scholarship</dt><dd>Essential</dd></div><div><dt>Education loan</dt><dd>Required</dd></div></dl></article>
+          </div>
+        </div>
+        <aside class="document-checklist card">
+          <div class="document-checklist-head"><div><small>DOCUMENT CHECKLIST</small><h2>Finish your documents</h2></div><span>{{ uploadedDocumentCount }}/{{ requiredDocuments.length }}</span></div>
+          <p>Missing documents can reduce the number of offers you receive.</p>
+          <div class="document-mini-list"><div *ngFor="let doc of requiredDocuments" [class.complete]="uploadedDocuments[doc]"><span>{{ uploadedDocuments[doc] ? '✓' : '!' }}</span><div><strong>{{ doc }}</strong><small>{{ uploadedDocuments[doc] ? 'Uploaded · ready to share' : 'Not uploaded yet' }}</small></div><button *ngIf="!uploadedDocuments[doc]" (click)="uploadDocument(doc)">Add</button><button *ngIf="uploadedDocuments[doc]" (click)="editProfileSection(7)">View</button></div></div>
+          <button class="primary-btn document-manage" (click)="editProfileSection(7)">Manage all documents →</button>
+        </aside>
+      </div>
+      <section class="student-account-settings">
+        <div class="section-title compact"><div><p class="eyebrow">ACCOUNT</p><h2>Preferences & account</h2><p>Control how SuperOffer contacts you and manage your account securely.</p></div></div>
+        <div class="account-settings-grid">
+          <article class="account-preferences card">
+            <div class="account-setting-row"><div><strong>Offer notifications</strong><p>Get notified when a university or lender sends or updates an offer.</p></div><label class="setting-switch"><input type="checkbox" [(ngModel)]="offerNotifications"><span></span></label></div>
+            <div class="account-setting-row"><div><strong>Email notifications</strong><p>Receive important deadlines, messages and account updates by email.</p></div><label class="setting-switch"><input type="checkbox" [(ngModel)]="emailNotifications"><span></span></label></div>
+            <div class="account-setting-row"><div><strong>Password & security</strong><p>Update your password and review active sign-in sessions.</p></div><button class="secondary-btn" (click)="notify('Security settings opened')">Manage</button></div>
+          </article>
+          <article class="account-actions card">
+            <button (click)="notify('You have been logged out of the demo')"><span>↪</span><div><strong>Log out</strong><small>Sign out of this device</small></div><b>→</b></button>
+            <button class="delete-account" (click)="notify('Delete account requires identity confirmation')"><span>!</span><div><strong>Delete account</strong><small>Permanently remove your profile and data</small></div><b>→</b></button>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="content onboarding" *ngIf="active === 'Profile' && (!profileSubmitted || profileEditMode)">
+      <div class="onboarding-top">
+        <div class="onboarding-heading"><button class="profile-hamburger" (click)="profileMenuOpen=true" aria-label="Open profile steps" aria-expanded="{{ profileMenuOpen }}"><span></span><span></span><span></span></button><div><p class="eyebrow" *ngIf="profileEditMode">EDIT PROFILE</p><h1>{{ profileEditMode ? 'Update ' + profileSections[profileStep].title.toLowerCase() : 'Build a profile universities can trust' }}</h1><p>{{ profileEditMode ? 'Review your saved information and make any changes needed.' : 'One complete profile for university admissions, scholarships and education loans.' }}</p></div></div>
+        <div class="progress-summary"><strong>{{ profileProgress }}%</strong><span><i [style.width.%]="profileProgress"></i></span><small>{{ profileEditMode ? 'Your live profile stays visible while editing' : 'Your progress is saved automatically' }}</small></div>
+      </div>
+      <button class="profile-drawer-backdrop" *ngIf="profileMenuOpen" (click)="profileMenuOpen=false" aria-label="Close profile steps"></button>
+      <div class="onboarding-layout">
+        <nav class="profile-stepper profile-drawer" [class.open]="profileMenuOpen" aria-label="Profile completion steps">
+          <div class="profile-drawer-head"><div><small>YOUR PROFILE</small><strong>Step {{ profileStep+1 }} of 9</strong></div><button (click)="profileMenuOpen=false" aria-label="Close profile steps">×</button></div>
+          <div class="journey-label">CHOOSE A SECTION</div>
+          <button *ngFor="let section of profileSections; let i=index" [class.current]="profileStep===i" [class.complete]="profileStep>i || profileSubmitted" (click)="selectProfileStep(i)">
+            <span>{{ profileStep>i || profileSubmitted ? '✓' : i+1 }}</span><div><strong>{{ section.title }}</strong><small *ngIf="i===0 && educationLevel">{{ educationLevel==='school' ? 'School student · UG' : 'College student · PG' }}</small></div>
+          </button>
+        </nav>
+
+        <article class="profile-form card">
+          <div class="form-title"><span class="section-icon">{{ profileSections[profileStep].icon }}</span><div><small>STEP {{ profileStep+1 }} OF 9</small><h2>{{ profileSections[profileStep].title }}</h2><p>{{ profileSections[profileStep].subtitle }}</p></div></div>
+          <div class="education-choice" *ngIf="profileStep===0">
+            <p>Choose the option that describes you today. We’ll personalize every next step.</p>
+            <button [class.selected]="educationLevel==='school'" (click)="chooseEducation('school')"><span>🎓</span><div><strong>School student</strong><b>Applying for undergraduate (UG)</b><small>I’m completing or have completed Class 12 / higher secondary school.</small></div><i>→</i></button>
+            <button [class.selected]="educationLevel==='college'" (click)="chooseEducation('college')"><span>▥</span><div><strong>College student</strong><b>Applying for postgraduate (PG)</b><small>I’m currently studying or have completed an undergraduate degree.</small></div><i>→</i></button>
+          </div>
+          <div *ngIf="profileStep===1"><div class="photo-uploader"><div class="photo-preview"><img *ngIf="profilePhoto" [src]="profilePhoto" alt="Profile photo preview"><span *ngIf="!profilePhoto">AM</span></div><div><strong>Add your profile photo</strong><p>Use a clear, recent headshot. This photo appears on your student portfolio for verified universities.</p><label class="photo-button">Upload photo<input type="file" accept="image/png,image/jpeg,image/webp" (change)="uploadPhoto($event)"></label><small>JPG, PNG or WebP · maximum 5 MB</small></div></div><div class="form-grid"><label>Full name as on passport<input value="Aarav Mehta"></label><label>Date of birth<input type="date" value="2007-03-14"></label><label>Email address<input value="aarav.mehta@email.com"></label><label>Mobile number<input value="+91 98765 43210"></label><label>Nationality<select><option>Indian</option></select></label><label>Passport number<input placeholder="Enter passport number"></label><label class="wide">Permanent address<input placeholder="Street, city, state and postal code"></label></div></div>
+          <div class="form-grid" *ngIf="profileStep===2"><label>{{ educationLevel==='school' ? 'School / institution name' : 'College / university name' }}<input placeholder="Enter official institution name"></label><label>{{ educationLevel==='school' ? 'Curriculum / board' : 'Degree and major' }}<input [placeholder]="educationLevel==='school' ? 'CBSE, ISC, State Board…' : 'e.g. BTech Computer Science'"></label><label>Current / final score<input placeholder="Percentage, CGPA or GPA"></label><label>Expected completion year<select><option>2027</option><option>2026</option></select></label><label *ngIf="educationLevel==='college'">Backlogs / arrears<input placeholder="Enter 0 if none"></label><label>Medium of instruction<input placeholder="e.g. English"></label></div>
+          <div *ngIf="profileStep===3"><div class="interest-picker"><div><strong>Select your streams of interest</strong><small>Choose all that apply. Universities use these interests to find relevant student profiles.</small></div><div><button *ngFor="let interest of streamInterests" [class.selected]="selectedInterests.includes(interest)" (click)="toggleInterest(interest)"><span>{{ selectedInterests.includes(interest) ? '✓' : '+' }}</span>{{ interest }}</button></div></div><div class="form-grid"><label>Target degree<select><option>{{ educationLevel==='school' ? 'Bachelor’s / Undergraduate' : 'Master’s / Postgraduate' }}</option></select></label><label>Preferred specialization<input placeholder="e.g. Machine Learning"></label><label>Preferred countries<input placeholder="Canada, UK, Australia…"></label><label>Preferred intake<select><option>Fall 2027</option><option>Spring 2027</option></select></label><label>Course delivery<select><option>On campus</option><option>Hybrid</option></select></label><label>University priorities<input placeholder="Ranking, placements, research…"></label></div></div>
+          <div *ngIf="profileStep===4"><div class="form-grid"><label>English language test<select><option>IELTS Academic</option><option>TOEFL iBT</option><option>PTE Academic</option><option>Not taken yet</option></select></label><label>Overall score<input value="8.0"></label><label>{{ educationLevel==='school' ? 'UG entrance exam' : 'PG entrance exam' }}<select><option>{{ educationLevel==='school' ? 'SAT' : 'GRE' }}</option><option>{{ educationLevel==='school' ? 'ACT' : 'GMAT' }}</option><option>Not taken yet</option></select></label><label>Overall score<input placeholder="Enter score"></label><label>Test date<input type="date"></label><label>Candidate / registration ID<input placeholder="Official test ID"></label></div><div class="helper-banner">✦ You can save planned exams now and upload official score reports in Documents.</div></div>
+          <div class="form-grid" *ngIf="profileStep===5"><label class="wide">Academic honours and awards<textarea placeholder="Olympiads, merit awards, scholarships, distinctions…"></textarea></label><label class="wide">Projects, research or portfolio<textarea placeholder="Describe important academic or independent work"></textarea></label><label>Extracurricular activities<textarea placeholder="Clubs, sports, arts, volunteering"></textarea></label><label>Leadership and work experience<textarea placeholder="Roles, internships, responsibilities"></textarea></label></div>
+          <div class="form-grid" *ngIf="profileStep===6"><label>Annual tuition budget<select><option>₹15–25 lakh</option><option>Below ₹15 lakh</option><option>₹25–40 lakh</option></select></label><label>Funding plan<select><option>Family savings + education loan</option><option>Self funded</option><option>Scholarship dependent</option></select></label><label>Scholarship required?<select><option>Yes — essential</option><option>Preferred</option><option>No</option></select></label><label>Education loan required?<select><option>Yes</option><option>Maybe</option><option>No</option></select></label><label>Maximum loan needed<input placeholder="e.g. ₹30 lakh"></label><label>Co-applicant available?<select><option>Yes</option><option>No</option></select></label></div>
+          <div class="documents-step" *ngIf="profileStep===7"><div class="document-guidance"><span>i</span><p><strong>Upload clear, official copies</strong>PDF, JPG or PNG · maximum 10 MB each. Your documents are shared only with verified institutions.</p></div><div class="document-list"><div *ngFor="let doc of requiredDocuments"><span [class.done]="uploadedDocuments[doc]">{{ uploadedDocuments[doc] ? '✓' : '▤' }}</span><div><strong>{{ doc }}</strong><small>{{ doc.includes('10') || doc.includes('12') ? 'Required for every applicant' : 'Required when available / applicable' }}</small></div><button (click)="uploadDocument(doc)">{{ uploadedDocuments[doc] ? 'Replace' : 'Upload' }}</button></div></div></div>
+          <div class="review-step" *ngIf="profileStep===8"><div class="ready-mark">✓</div><h2>Your profile is ready to submit</h2><p>Review your details carefully. After submission, verified universities can discover you and send personalized admission offers.</p><div class="review-grid"><div><span>🎓</span><small>EDUCATION LEVEL</small><strong>{{ educationLevel==='school' ? 'School student · UG applicant' : 'College student · PG applicant' }}</strong></div><div><span>◎</span><small>PROFILE SECTIONS</small><strong>8 of 8 completed</strong></div><div><span>▤</span><small>DOCUMENTS</small><strong>{{ (uploadedDocuments | keyvalue).length }} uploaded</strong></div><div><span>⌾</span><small>VISIBILITY</small><strong>Verified institutions only</strong></div></div><label class="consent"><input type="checkbox" checked> I confirm that this information is accurate and consent to sharing my profile with verified universities and education loan providers for matching.</label></div>
+          <div class="form-actions" *ngIf="profileStep>0 && !profileSubmitted"><button class="secondary-btn" (click)="previousProfileStep()">← Back</button><span></span><button class="primary-btn" *ngIf="profileStep<8" (click)="nextProfileStep()">Save & continue →</button><button class="submit-profile" *ngIf="profileStep===8" (click)="submitProfile()">Submit profile & view dashboard →</button></div>
+          <div class="form-actions edit-actions" *ngIf="profileEditMode"><button class="secondary-btn" (click)="profileEditMode=false">Cancel</button><span></span><button class="primary-btn" (click)="saveProfileChanges()">Save changes →</button></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="content" *ngIf="active === 'Search Students' || active === 'Eligibility Review' || (active === 'Shortlists' && role !== 'university') || active === 'Active Clients'">
+      <div class="page-heading"><div><p class="eyebrow">AI-POWERED DISCOVERY</p><h1>{{ active }}</h1><p>Find students who fit your criteria and are ready for their next step.</p></div><button class="secondary-btn" (click)="notify('Saved searches opened')">☆ Saved searches</button></div>
+      <div class="ai-search"><span>✦</span><input [(ngModel)]="search" placeholder="Try “Data Science students targeting Canada with IELTS 7+”"><button class="primary-btn" (click)="notify('Search parsed into structured filters')">Search</button></div>
+      <div class="search-toolbar"><button class="secondary-btn" (click)="showSearchFilters=!showSearchFilters">☷ Filters <b>4</b></button><div class="active-filters"><span>Canada ×</span><span>Masters ×</span><span>Fall 2027 ×</span><button>Clear all</button></div><label>Sort by: <select><option>Best match</option><option>Most recent</option><option>Profile completion</option></select></label></div>
+      <div class="results-layout">
+        <aside class="filters card" *ngIf="showSearchFilters"><strong>Refine results</strong><label>Target country<select><option>Canada</option></select></label><label>Degree level<select><option>Masters</option></select></label><label>Minimum IELTS<input type="range" min="5" max="9" value="7"></label><label>Profile completion<input type="range" min="70" max="100" value="80"></label><button class="primary-btn full">Apply filters</button></aside>
+        <div class="search-results" [class.with-filters]="showSearchFilters">
+          <div class="result-meta"><strong>248 matching students</strong><span>Only discoverable profiles are shown</span></div>
+          <article class="student-card card" *ngFor="let person of students; let i=index">
+            <span class="candidate-avatar big" [style.background]="person.accent">{{ person.initials }}</span>
+            <div class="student-info"><div><h3>{{ person.name }}</h3><span class="verified">✓ Verified profile</span></div><p>{{ person.course }} · {{ person.intake }}</p><div class="student-tags"><span>{{ person.country }}</span><span>{{ person.detail.split(' · ')[0] }}</span><span>{{ person.completion }}% complete</span></div><small>Contact details stay private until an offer is accepted.</small></div>
+            <div class="score-card"><strong>{{ person.score }}<small>%</small></strong><span>Excellent match</span><p>Academic fit · Course alignment · Intake</p></div>
+            <div class="student-actions"><button class="secondary-btn" (click)="openCandidate(i)">View profile</button><button class="secondary-btn" (click)="notify(person.name+' shortlisted')">☆ Shortlist</button><button class="primary-btn" (click)="composeUniversityOffer(i)">Send offer →</button></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="content placeholder-page" *ngIf="!['Dashboard','Offers','Inbox','University Offers','My Offers','Invitations','Profile','Search Students','Eligibility Review','Shortlists','Active Clients','Programs & Offers','Reports','Org Settings'].includes(active)">
+      <span class="placeholder-icon">✦</span><p class="eyebrow">{{ cfg.label }}</p><h1>{{ active }}</h1><p>This role-specific screen is mapped to the product specification and ready for the next UI review pass.</p><button class="primary-btn" (click)="navigate('Dashboard')">Return to dashboard</button>
+    </section>
+  </main>
+
+  <div class="university-panel-backdrop" *ngIf="showCandidateProfile" (click)="showCandidateProfile=false">
+    <aside class="candidate-profile-panel" (click)="$event.stopPropagation()">
+      <header><button (click)="showCandidateProfile=false">×</button><span>Contact details protected until acceptance</span></header>
+      <div class="candidate-profile-hero"><span [style.background]="selectedStudent.accent">{{ selectedStudent.initials }}</span><div><small>DISCOVERABLE STUDENT</small><h1>{{ selectedStudent.name }}</h1><p>{{ selectedStudent.course }} · {{ selectedStudent.intake }}</p></div><strong>{{ selectedStudent.score }}<small>% match</small></strong></div>
+      <div class="match-factor-list"><h2>Why this student matches</h2><div><span>Academic fit</span><b><i style="width:96%"></i></b><strong>96</strong></div><div><span>Course alignment</span><b><i style="width:94%"></i></b><strong>94</strong></div><div><span>Test score fit</span><b><i style="width:91%"></i></b><strong>91</strong></div><div><span>Country & intake</span><b><i style="width:90%"></i></b><strong>90</strong></div><small>AI ranks candidates; it never makes an admission decision.</small></div>
+      <section><h2>Academic profile</h2><dl><div><dt>Current qualification</dt><dd>BTech · Computer Science</dd></div><div><dt>Academic score</dt><dd>8.8 / 10 CGPA</dd></div><div><dt>IELTS</dt><dd>8.0 · Verified</dd></div><div><dt>GRE</dt><dd>324 · Verified</dd></div></dl></section>
+      <section><h2>Study goals</h2><dl><div><dt>Target</dt><dd>Master’s in Data Science</dd></div><div><dt>Countries</dt><dd>Canada, United Kingdom</dd></div><div><dt>Budget</dt><dd>₹15–25 lakh annually</dd></div><div><dt>Scholarship need</dt><dd>Essential</dd></div></dl></section>
+      <footer><button class="secondary-btn" (click)="notify(selectedStudent.name+' shortlisted')">☆ Add to shortlist</button><button class="primary-btn" (click)="composeUniversityOffer()">Send offer →</button></footer>
+    </aside>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showUniversityOfferComposer" (click)="showUniversityOfferComposer=false">
+    <article class="university-offer-composer" (click)="$event.stopPropagation()">
+      <header><div><small>NEW INVITATION</small><h2>Offer for {{ selectedStudent.name }}</h2><p>Confirm every term before sending. An invitation always includes one offer.</p></div><button (click)="showUniversityOfferComposer=false">×</button></header>
+      <div class="composer-student"><span [style.background]="selectedStudent.accent">{{ selectedStudent.initials }}</span><div><strong>{{ selectedStudent.name }}</strong><small>{{ selectedStudent.score }}% match · {{ selectedStudent.course }}</small></div><b>Contact protected</b></div>
+      <label>Start from template<select><option>Merit scholarship · 40%</option><option>Priority admission · fee waiver</option><option>Blank offer</option></select></label>
+      <div class="composer-grid"><label>Programme<select><option>MSc Data Science · Fall 2027</option><option>MSc Artificial Intelligence · Fall 2027</option></select></label><label>Scholarship percentage<input type="number" value="40"></label><label>Application fee<select><option>Fully waived</option><option>Standard fee applies</option></select></label><label>Admission route<select><option>Fast-track review</option><option>Standard review</option></select></label><label>Offer validity<input value="14 days" disabled></label><label>Seat deposit<input value="CAD 1,500"></label></div>
+      <label>Personal message<textarea>Congratulations! Your academic record and study goals are an excellent fit for our MSc Data Science programme.</textarea></label>
+      <div class="composer-warning"><span>i</span><p>Accepted offer terms become immutable. To change them later, the student must withdraw and you must issue a new invitation.</p></div>
+      <footer><button class="secondary-btn" (click)="showUniversityOfferComposer=false">Cancel</button><button class="secondary-btn" (click)="notify('Offer saved as draft')">Save draft</button><button class="primary-btn" (click)="sendUniversityOffer()">Confirm & send invitation →</button></footer>
+    </article>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showOffer" (click)="showOffer=false">
+    <article class="offer-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="showOffer=false">×</button>
+      <div class="modal-brand"><span class="logo violet">NB</span><div><small>UNIVERSITY OFFER</small><h2>Northbridge University</h2><p>MSc Data Science · Fall 2027</p></div></div>
+      <div class="match-explain"><span>✦</span><div><strong>94% match — Excellent fit</strong><p>Strong academic alignment, target course and intake match.</p></div></div>
+      <div class="offer-hero"><small>YOUR SCHOLARSHIP</small><strong>40%</strong><span>CAD 13,200 saved</span></div>
+      <div class="terms"><div><small>Tuition after award</small><strong>CAD 19,800 / year</strong></div><div><small>Application fee</small><strong>Fully waived</strong></div><div><small>Decision timeline</small><strong>Fast-track · 10 days</strong></div><div><small>Offer expires</small><strong>02 Aug 2026</strong></div></div>
+      <div class="condition"><strong>Offer conditions</strong><p>Maintain your current academic standing and submit an official final transcript before enrollment.</p></div>
+      <div class="modal-note"><span>◷</span><p>You can request changes once. This invitation expires in <strong>8 days</strong>.</p></div>
+      <div class="modal-actions"><button class="danger-text" (click)="action('Offer declined. The institution will be notified.')">Decline</button><button class="secondary-btn" (click)="action('Negotiation request started — you can use this once')">Request changes</button><button class="primary-btn" (click)="action('Offer accepted! Northbridge University has been notified.')">Accept offer</button></div>
+    </article>
+  </div>
+
+  <div class="toast" *ngIf="toast"><span>✓</span>{{ toast }}</div>
+</div>
