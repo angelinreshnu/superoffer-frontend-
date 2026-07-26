@@ -33,7 +33,7 @@ This repository is a monorepo containing three independently deployed services.
 - Build type: Dockerfile
 - Build path/context: `/frontend`
 - Dockerfile: `/frontend/Dockerfile`
-- Internal port: `80`
+- Internal port: `3000` recommended (`80` is also supported)
 - Health check: `/health`
 - Environment:
   - `SUPER_OFFER_API_URL=https://<backend domain>/api/v1`
