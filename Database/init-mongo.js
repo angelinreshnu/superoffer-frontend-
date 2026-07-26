@@ -49,6 +49,7 @@ database.students.insertMany([
 ]);
 
 database.admission_offers.insertMany([
+  { id: 'offer-1000', student_id: NumberInt(1), institution: 'Northbridge University', institution_initial: 'N', program: 'MSc Data Science', offer_type: 'CONDITIONAL_ADMISSION', award: '40% Global Excellence Scholarship', response_deadline: new Date('2026-08-15'), status: 'SENT', sent_at: new Date('2026-07-24T10:00:00Z'), updated_at: new Date() },
   { id: 'offer-1001', student_id: NumberInt(2), program: 'MSc Data Science', offer_type: 'CONDITIONAL_ADMISSION', award: '30% scholarship', response_deadline: new Date('2026-08-15'), status: 'VIEWED', sent_at: new Date('2026-07-18T10:00:00Z'), updated_at: new Date() },
   { id: 'offer-1002', student_id: NumberInt(4), program: 'MSc Data Science', offer_type: 'CONDITIONAL_ADMISSION', award: '20% scholarship', response_deadline: new Date('2026-08-15'), status: 'ACCEPTED', sent_at: new Date('2026-07-15T10:00:00Z'), updated_at: new Date() },
   { id: 'offer-1003', student_id: NumberInt(3), program: 'MSc Artificial Intelligence', offer_type: 'PRIORITY_ADMISSION', award: 'Priority admission', response_deadline: new Date('2026-08-15'), status: 'SENT', sent_at: new Date('2026-07-12T10:00:00Z'), updated_at: new Date() }
