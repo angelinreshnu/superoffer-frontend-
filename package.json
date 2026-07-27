@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "./node_modules/.bin/node frontend/node_modules/@angular/cli/bin/ng.js build --configuration production",
-    "start": "serve -s frontend/dist/superoffer/browser -l tcp://0.0.0.0:${PORT:-3000}"
+    "start": "sh ./start-frontend.sh"
   },
   "dependencies": {
     "node": "24.15.0",
