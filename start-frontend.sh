@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-api_url="${SUPER_OFFER_API_URL:-/api/v1}"
+api_url="${SUPER_OFFER_API_URL:-https://api.superoffer.net/api/v1}"
 
 case "$api_url" in
   http://*|https://*|/api/*) ;;
