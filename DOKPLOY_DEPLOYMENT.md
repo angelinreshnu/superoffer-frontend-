@@ -24,7 +24,7 @@ This repository is a monorepo containing three independently deployed services.
 - Environment:
   - `MONGODB_URI=mongodb://superoffer:<encoded password>@<mongodb service hostname>:27017/superoffer?authSource=admin`
   - `MONGODB_DATABASE=superoffer`
-  - `CORS_ORIGIN=https://<frontend domain>`
+  - `CORS_ORIGIN=https://superoffer.net`
 - Generate or attach a public backend domain.
 
 ## 3. Frontend
@@ -33,11 +33,17 @@ This repository is a monorepo containing three independently deployed services.
 - Build type: Dockerfile
 - Build path/context: `/frontend`
 - Dockerfile: `/frontend/Dockerfile`
-- Internal port: `3000` recommended (`80` is also supported)
+- Internal port: `80`
 - Health check: `/health`
 - Environment:
-  - `SUPER_OFFER_API_URL=https://<backend domain>/api/v1`
+  - `SUPER_OFFER_API_URL=https://api.superoffer.net/api/v1`
 - Generate or attach a public frontend domain.
+
+## Required domains
+
+- `superoffer.net` routes to the frontend application on container port `80`.
+- `api.superoffer.net` routes to the backend application on container port `3000`.
+- Both DNS records must point to the Dokploy server before certificates are issued.
 
 ## API log demonstration
 
