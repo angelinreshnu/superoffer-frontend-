@@ -1,0 +1,12 @@
+{
+  "name": "superoffer-frontend-deployment",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --prefix frontend",
+    "start": "serve -s frontend/dist/superoffer/browser -l tcp://0.0.0.0:${PORT:-3000}"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}
