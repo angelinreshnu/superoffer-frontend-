@@ -5,7 +5,7 @@ This repository is a monorepo containing three independently deployed services.
 ## 1. Database
 
 - Dokploy type: Docker Compose
-- Compose file: `/Database/docker-compose.yml`
+- Compose file: `/backend/database/docker-compose.yml`
 - Environment:
   - `MONGO_INITDB_DATABASE=superoffer`
   - `MONGO_INITDB_ROOT_USERNAME=superoffer`
