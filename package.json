@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm ci --prefix frontend --include=dev && npm run build --prefix frontend -- --configuration production",
+    "build": "./node_modules/.bin/node frontend/node_modules/@angular/cli/bin/ng.js build --configuration production",
     "start": "sh ./start-frontend.sh"
   },
   "dependencies": {
